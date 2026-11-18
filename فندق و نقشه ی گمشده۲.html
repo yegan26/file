@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ماجراجویی فندق و نقشه گمشده</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --dark: #2d3436;
+            --light: #f7f1e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+            z-index: 10;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 900;
+        }
+
+        .designer-tag {
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* فرم ورود نام */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--secondary);
+        }
+
+        /* دکمه‌ها */
+        .btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: #45b7af;
+        }
+
+        /* مراحل بازی */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--light);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .question-box {
+            font-size: 1.05rem;
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #dfe6e9;
+            padding: 12px 15px;
+            border-radius: 12px;
+            text-align: right;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .option-btn:hover {
+            background: #f1f2f6;
+            border-color: #74b9ff;
+        }
+
+        .option-btn.correct {
+            background: #2ecc71 !important;
+            color: white;
+            border-color: #27ae60;
+            animation: bounce 0.5s;
+        }
+
+        .option-btn.wrong {
+            background: #e74c3c !important;
+            color: white;
+            border-color: #c0392b;
+            animation: shake 0.4s;
+        }
+
+        /* صفحه پایان */
+        .end-screen {
+            text-align: center;
+        }
+
+        .end-screen h2 {
+            color: #2ecc71;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .trophy {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        /* افکت بارش ستاره‌ها */
+        .star-particle {
+            position: fixed;
+            font-size: 1.5rem;
+            animation: fallStar 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes fallStar {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>🐿️ ماجراجویی فندق و نقشه گمشده</h1>
+            <div class="designer-tag">طراح و آموزگار: فرشته فرجادی</div>
+        </div>
+
+        <div class="content">
+            <!-- صفحه اول: ورود نام -->
+            <div id="welcome-screen" class="screen active">
+                <div class="form-group">
+                    <label for="student-name">نام و نام خانوادگی قشنگت:</label>
+                    <input type="text" id="student-name" placeholder="مثلاً: سارا احمدی">
+                </div>
+                <button class="btn" onclick="startGame()">شروع ماجراجویی 🚀</button>
+            </div>
+
+            <!-- صفحه سوالات -->
+            <div id="game-screen" class="screen">
+                <div class="progress-bar">
+                    <span id="step-indicator">مرحله ۱ از ۵</span>
+                    <span id="player-display" style="color: var(--primary);"></span>
+                </div>
+                <div class="question-box" id="question-text">متن سوال اینجا قرار می‌گیرد...</div>
+                <div class="options" id="options-container">
+                    <!-- گزینه‌ها به صورت پویا ساخته می‌شوند -->
+                </div>
+            </div>
+
+            <!-- صفحه پایان -->
+            <div id="end-screen" class="screen end-screen">
+                <div class="trophy">🏆</div>
+                <h2>آفرین قهرمان!</h2>
+                <p id="congrats-msg" style="margin-bottom: 20px; font-size: 1.1rem; color: var(--dark);"></p>
+                <button class="btn" onclick="restartGame()">بازی دوباره 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "مرحله ۱: فندق در ابتدای داستان به دنبال چه چیزی می‌گشت؟",
+                options: ["گردوی تازه", "نقشه گمشده", "خانه‌اش", "دوستش"],
+                correct: 1
+            },
+            {
+                question: "مرحله ۲: کدام حیوان در پیدا کردن مسیر به فندق کمک کرد؟",
+                options: ["کلاغ دانا", "خرگوش بازیگوش", "جغد مهربان", "سنجاب کوچک"],
+                correct: 0
+            },
+            {
+                question: "مرحله ۳: نقشه گمشده فندق را به کجا راهنمایی می‌کرد؟",
+                options: ["رودخانه خروشان", "درخت گردوی طلایی", "غار تاریک", "کوه پربرف"],
+                correct: 1
+            },
+            {
+                question: "مرحله ۴: فندق در طول مسیر یاد گرفت که چه کاری انجام دهد؟",
+                options: ["تنهایی همه کارها را بکند", "به دوستانش کمک کند و مهربان باشد", "صداها را نشنیده بگیرد", "سریع‌تر بدود"],
+                correct: 1
+            },
+            {
+                question: "مرحله ۵: پیام اصلی و قشنگ این داستان چیست؟",
+                options: ["همکاری، دوستی و تلاش", "قهر کردن با دیگران", "پنهان کردن وسایل", "ترس از جنگل"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let studentName = "";
+        let score = 0;
+
+        function startGame() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if (nameInput === "") {
+                alert("لطفاً اول نام قشنگت را بنویس!");
+                return;
+            }
+            studentName = nameInput;
+            document.getElementById('player-display').innerText = `دانش‌آموز: ${studentName}`;
+            
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                endGame();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            const remaining = questions.length - currentQuestion - 1;
+            document.getElementById('step-indicator').innerText = `مرحله ${currentQuestion + 1} از ${questions.length} (باقی‌مانده: ${remaining})`;
+            document.getElementById('question-text').innerText = q.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = "";
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, selectedBtn) {
+            const q = questions[currentQuestion];
+            const allBtns = document.querySelectorAll('.option-btn');
+
+            allBtns.forEach(b => b.onclick = null);
+
+            if (selectedIndex === q.correct) {
+                selectedBtn.classList.add('correct');
+                score++;
+                createStars(selectedBtn); // اجرای افکت ستاره
+            } else {
+                selectedBtn.classList.add('wrong');
+                allBtns[q.correct].classList.add('correct');
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion();
+            }, 1300);
+        }
+
+        function createStars(element) {
+            const rect = element.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top;
+
+            for (let i = 0; i < 6; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-particle';
+                star.innerText = '⭐';
+                star.style.left = `${x + (Math.random() * 60 - 30)}px`;
+                star.style.top = `${y}px`;
+                document.body.appendChild(star);
+
+                setTimeout(() => {
+                    star.remove();
+                }, 1000);
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.add('active');
+            document.getElementById('congrats-msg').innerText = `${studentName} عزیز، تو توانستی تمام ۵ مرحله بازی را با موفقیت تمام کنی و تمام ستاره‌ها را بگیری! ⭐🎉`;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('end-screen').classList.remove('active');
+            document.getElementById('welcome-screen').classList.add('active');
+            document.getElementById('student-name').value = "";
+        }
+    </script>
+</body>
+</html>
